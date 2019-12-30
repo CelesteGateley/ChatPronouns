@@ -81,14 +81,13 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                 player.spigot().sendMessage(component);
             }
         }
-
-
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().toLowerCase().equals("setpronouns")) {
             if (sender instanceof Player) {
+                if (args.length < 1) { sendInvalidUsageMessage(sender); return true; }
                 switch (args[0].toLowerCase()) {
                     case "f":
                         setPronouns((Player) sender, new PronounSet("&dF", "She/Her"));
@@ -113,7 +112,8 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
             Player player = getServer().getPlayer(args[0]);
             if (player == null) { sendInvalidUsageCustomMessage(sender); return true; }
             setPronouns(player, new PronounSet(args[1], args[2]));
-
+            sendSetPronounMessage(player, args[2]);
+            sendSetPronounOthersMessage(sender, player, args[2]);
         }
         return true;
     }
@@ -147,7 +147,15 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         sender.sendMessage(languageManager.generateMessage("invalidUsage"));
     }
 
-    private static class PronounSet implements ConfigurationSerializable {
+    private void sendSetPronounOthersMessage(CommandSender sender, Player player, String pronouns) {
+        Map<String, String> args = new HashMap<>();
+        args.put("pronouns", pronouns);
+        args.put("display", player.getDisplayName());
+        args.put("player", player.getName());
+        sender.sendMessage(languageManager.generateMessage("setOthersPronouns", args));
+    }
+
+    public static class PronounSet implements ConfigurationSerializable {
 
         private String miniatureString;
         private String hoverText;
