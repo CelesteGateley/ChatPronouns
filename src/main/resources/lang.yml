@@ -1,4 +1,4 @@
-prefix: "&7[&9SH Pronouns&7] &b"
+prefix: "&7[&9SH Pronouns&7]&b"
 
 chatFormat: "%display%&r: %message%"
 
