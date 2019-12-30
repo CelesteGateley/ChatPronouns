@@ -1,0 +1,9 @@
+prefix: "&7[&9SH Pronouns&7] &b"
+
+chatFormat: "%display%&r: %message%"
+
+setPronouns: "Your pronouns have been set to %pronouns%"
+setOthersPronouns: "You have set %player%'s pronouns to %pronouns%"
+unknownPlayer: "Unknown player: %player%"
+invalidUsage: "Invalid usage: /setpronouns (f/m/n). If custom ones are required, please speak to a staff member."
+invalidUsageCustom: "Invalid usage: /setcustompronouns (player) (icon) (pronouns)"
