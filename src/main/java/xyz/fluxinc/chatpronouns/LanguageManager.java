@@ -1,9 +1,7 @@
 package xyz.fluxinc.chatpronouns;
 
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.fluxinc.fluxcore.configuration.ConfigurationManager;
 
 import java.util.Map;
 
