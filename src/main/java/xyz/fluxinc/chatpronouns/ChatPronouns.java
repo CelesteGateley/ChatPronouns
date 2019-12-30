@@ -16,7 +16,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.fluxinc.fluxcore.configuration.LanguageManager;
 
 import java.io.File;
 import java.io.IOException;
