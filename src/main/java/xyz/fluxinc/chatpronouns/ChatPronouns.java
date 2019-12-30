@@ -151,9 +151,9 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     private void sendSetPronounOthersMessage(CommandSender sender, Player player, String pronouns) {
         Map<String, String> args = new HashMap<>();
         args.put("pronouns", pronouns);
-        args.put("%display%", player.getDisplayName());
-        args.put("%player%", player.getName());
-        sender.sendMessage(languageManager.generateMessage("setPronouns", args));
+        args.put("display", player.getDisplayName());
+        args.put("player", player.getName());
+        sender.sendMessage(languageManager.generateMessage("setOthersPronouns", args));
     }
 
     public static class PronounSet implements ConfigurationSerializable {
