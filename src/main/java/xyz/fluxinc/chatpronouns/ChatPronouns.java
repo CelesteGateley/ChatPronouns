@@ -45,6 +45,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("setpronouns").setExecutor(this);
+        getCommand("setcustompronouns").setExecutor(this);
     }
 
     @Override

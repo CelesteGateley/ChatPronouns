@@ -6,3 +6,9 @@ description: Shows a players pronouns in chat, if they have them set
 commands:
   setpronouns:
     usage: /setpronouns <f/m/n>
+  setcustompronouns:
+    usage: /setcustompronouns (player) (icon) (pronouns)
+    permission: chatpronouns.custom
+permissions:
+  chatpronouns.custom:
+    default: op
