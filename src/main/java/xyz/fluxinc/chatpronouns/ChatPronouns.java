@@ -25,13 +25,15 @@ import java.util.Map;
 public final class ChatPronouns extends JavaPlugin implements Listener, CommandExecutor {
 
     private YamlConfiguration storage;
+    private YamlConfiguration config;
     private File storageFile;
+    private File configFile;
     private LanguageManager languageManager;
+    private boolean useHover;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
-
         ConfigurationSerialization.registerClass(PronounSet.class);
 
         languageManager = new LanguageManager(this, "lang.yml");
@@ -39,6 +41,12 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         storage = new YamlConfiguration();
         storageFile = new File(getDataFolder(), "storage.yml");
         if (!storageFile.exists()) { saveResource("storage.yml", false); }
+
+        config = new YamlConfiguration();
+        configFile = new File(getDataFolder(), "config.yml");
+        if (!configFile.exists()) { saveResource("config.yml", false); }
+
+        useHover = config.getBoolean("use-hover");
 
         try { storage.load(storageFile); }
         catch (InvalidConfigurationException | IOException e) { e.printStackTrace();}
@@ -56,8 +64,32 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     @EventHandler
     public void chatEvent(AsyncPlayerChatEvent chatEvent) {
         PronounSet pronouns = getPronouns(chatEvent.getPlayer());
+        if (pronouns == null) { return; }
 
-        if (pronouns != null) {
+        if (useHover) {
+            String format = languageManager.getKey("chatFormat");
+            format = format.replace("%display%", chatEvent.getPlayer().getDisplayName());
+            format = format.replace("%player%", chatEvent.getPlayer().getName());
+            format = format.replace("%message%", chatEvent.getMessage());
+
+
+            TextComponent component = new TextComponent();
+            TextComponent mainComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', format));
+
+            TextComponent prefixComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', "&f[" + pronouns.miniatureString + "&f]"));
+            prefixComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pronouns.hoverText).create()));
+            component.addExtra(prefixComponent);
+            component.addExtra(" ");
+
+            component.addExtra(mainComponent);
+
+            if (!chatEvent.isCancelled()) {
+                chatEvent.setCancelled(true);
+                for (Player player : getServer().getOnlinePlayers()) {
+                    player.spigot().sendMessage(component);
+                }
+            }
+        } else {
             chatEvent.setFormat(ChatColor.translateAlternateColorCodes('&', "[&7" + pronouns.miniatureString + "&7]") + chatEvent.getFormat());
         }
     }
