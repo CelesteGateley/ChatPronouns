@@ -57,29 +57,8 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     public void chatEvent(AsyncPlayerChatEvent chatEvent) {
         PronounSet pronouns = getPronouns(chatEvent.getPlayer());
 
-        String format = languageManager.getKey("chatFormat");
-        format = format.replace("%display%", chatEvent.getPlayer().getDisplayName());
-        format = format.replace("%player%", chatEvent.getPlayer().getName());
-        format = format.replace("%message%", chatEvent.getMessage());
-
-
-        TextComponent component = new TextComponent();
-        TextComponent mainComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', format));
-
         if (pronouns != null) {
-            TextComponent prefixComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', "&f[" + pronouns.miniatureString + "&f]"));
-            prefixComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pronouns.hoverText).create()));
-            component.addExtra(prefixComponent);
-            component.addExtra(" ");
-        }
-
-        component.addExtra(mainComponent);
-
-        if (!chatEvent.isCancelled()) {
-            chatEvent.setCancelled(true);
-            for (Player player : getServer().getOnlinePlayers()) {
-                player.spigot().sendMessage(component);
-            }
+            chatEvent.setFormat(ChatColor.translateAlternateColorCodes('&', "[&7" + pronouns.miniatureString + "&7]") + chatEvent.getFormat());
         }
     }
 
