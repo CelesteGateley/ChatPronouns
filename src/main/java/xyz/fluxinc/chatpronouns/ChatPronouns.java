@@ -58,7 +58,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+
     }
 
     @EventHandler
@@ -90,7 +90,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                 }
             }
         } else {
-            chatEvent.setFormat(ChatColor.translateAlternateColorCodes('&', "[&7" + pronouns.miniatureString + "&7]") + chatEvent.getFormat());
+            chatEvent.setFormat(ChatColor.translateAlternateColorCodes('&', "&f[" + pronouns.miniatureString + "&f] &r") + chatEvent.getFormat());
         }
     }
 
