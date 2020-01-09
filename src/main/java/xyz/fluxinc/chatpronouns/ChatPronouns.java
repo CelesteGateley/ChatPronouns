@@ -17,6 +17,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.fluxinc.fluxcore.configuration.LanguageManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,13 +63,13 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void chatEvent(AsyncPlayerChatEvent chatEvent) {
         PronounSet pronouns = getPronouns(chatEvent.getPlayer());
         if (pronouns == null) { return; }
 
         if (useHover) {
-            String format = languageManager.getKey("chatFormat");
+            String format = languageManager.getFormattedString("chatFormat");
             format = format.replace("%display%", chatEvent.getPlayer().getDisplayName());
             format = format.replace("%player%", chatEvent.getPlayer().getName());
             format = format.replace("%message%", chatEvent.getMessage());
