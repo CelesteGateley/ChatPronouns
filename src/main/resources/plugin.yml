@@ -5,10 +5,14 @@ api-version: 1.13
 description: Shows a players pronouns in chat, if they have them set
 commands:
   setpronouns:
-    usage: /setpronouns <f/m/n>
+    usage: /setpronouns <f/m/n> [player]
   setcustompronouns:
     usage: /setcustompronouns (player) (icon) (pronouns)
     permission: chatpronouns.custom
+  removepronouns:
+    usage: /removepronouns [player]
 permissions:
   chatpronouns.custom:
+    default: op
+  chatpronouns.others:
     default: op

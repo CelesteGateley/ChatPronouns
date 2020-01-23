@@ -98,11 +98,11 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().toLowerCase().equals("setpronouns")) {
-            if (sender instanceof Player) {
+        switch (command.getName().toLowerCase()) {
+            case "setpronouns":
                 Player target = (Player) sender;
                 if (args.length < 1) { sendInvalidUsageMessage(sender); return true; }
-                if (args.length == 2) {
+                if (args.length == 2 && sender.hasPermission("chatpronouns.others")) {
                     target = getServer().getPlayer(args[1]);
                     if (target == null) { sendInvalidPlayer(sender, args[1]); return true; }
                 }
@@ -123,24 +123,24 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                         sendInvalidUsageMessage(sender);
                         break;
                 }
-            }
             return true;
-        } if (command.getName().toLowerCase().equals("setcustompronouns")) {
+        case "setcustompronouns":
             if (args.length < 3) { sendInvalidUsageCustomMessage(sender); return true; }
             Player player = getServer().getPlayer(args[0]);
             if (player == null) { sendInvalidUsageCustomMessage(sender); return true; }
             setPronouns(player, new PronounSet(args[1], args[2]));
             sendSetPronounMessage(player, args[2]);
             sendSetPronounOthersMessage(sender, player, args[2]);
-        } if (command.getName().toLowerCase().equals("removepronouns")) {
-            Player target = (Player) sender;
-            if (args.length == 1) {
-                target = getServer().getPlayer(args[0]);
-                if (target == null) { sendInvalidPlayer(sender, args[0]); return true; }
+            return true;
+        case "removepronouns":
+            Player cmdTarget = (Player) sender;
+            if (args.length == 1 && sender.hasPermission("chatpronouns.others")) {
+                cmdTarget = getServer().getPlayer(args[0]);
+                if (cmdTarget == null) { sendInvalidPlayer(sender, args[0]); return true; }
             }
-            removePronouns(target);
-            if (target == sender) { sendRemovedPronouns(sender); }
-            else { sendRemovedPronouns(target); sendTargetRemovedPronouns(sender, args[0]); }
+            removePronouns(cmdTarget);
+            if (cmdTarget == sender) { sendRemovedPronouns(sender); }
+            else { sendRemovedPronouns(cmdTarget); sendTargetRemovedPronouns(sender, args[0]); }
         }
         return true;
     }
