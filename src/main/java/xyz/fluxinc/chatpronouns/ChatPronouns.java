@@ -100,19 +100,24 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().toLowerCase().equals("setpronouns")) {
             if (sender instanceof Player) {
+                Player target = (Player) sender;
                 if (args.length < 1) { sendInvalidUsageMessage(sender); return true; }
+                if (args.length == 2) {
+                    target = getServer().getPlayer(args[1]);
+                    if (target == null) { sendInvalidPlayer(sender, args[1]); return true; }
+                }
                 switch (args[0].toLowerCase()) {
                     case "f":
-                        setPronouns((Player) sender, new PronounSet("&dF", "She/Her"));
-                        sendSetPronounMessage(sender, "She/Her");
+                        setPronouns(target, new PronounSet("&dF", "She/Her"));
+                        sendSetPronounMessage(target, "She/Her");
                         break;
                     case "m":
-                        setPronouns((Player) sender, new PronounSet("&bM", "He/Him"));
-                        sendSetPronounMessage(sender, "He/Him");
+                        setPronouns(target, new PronounSet("&bM", "He/Him"));
+                        sendSetPronounMessage(target, "He/Him");
                         break;
                     case "n":
-                        setPronouns((Player) sender, new PronounSet("&fN", "They/Them"));
-                        sendSetPronounMessage(sender, "They/Them");
+                        setPronouns(target, new PronounSet("&fN", "They/Them"));
+                        sendSetPronounMessage(target, "They/Them");
                         break;
                     default:
                         sendInvalidUsageMessage(sender);
@@ -127,6 +132,15 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
             setPronouns(player, new PronounSet(args[1], args[2]));
             sendSetPronounMessage(player, args[2]);
             sendSetPronounOthersMessage(sender, player, args[2]);
+        } if (command.getName().toLowerCase().equals("removepronouns")) {
+            Player target = (Player) sender;
+            if (args.length == 1) {
+                target = getServer().getPlayer(args[0]);
+                if (target == null) { sendInvalidPlayer(sender, args[0]); return true; }
+            }
+            removePronouns(target);
+            if (target == sender) { sendRemovedPronouns(sender); }
+            else { sendRemovedPronouns(target); sendTargetRemovedPronouns(sender, args[0]); }
         }
         return true;
     }
@@ -146,10 +160,35 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         }
     }
 
+    private void removePronouns(Player player) {
+        storage.set("" + player.getUniqueId(), null);
+        try {
+            storage.save(storageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void sendSetPronounMessage(CommandSender sender, String pronouns) {
         Map<String, String> args = new HashMap<>();
         args.put("pronouns", pronouns);
         sender.sendMessage(languageManager.generateMessage("setPronouns", args));
+    }
+
+    private void sendInvalidPlayer(CommandSender sender, String player) {
+        Map<String, String> args = new HashMap<>();
+        args.put("player", player);
+        sender.sendMessage(languageManager.generateMessage("unknownPlayer", args));
+    }
+
+    private void sendRemovedPronouns(CommandSender sender) {
+        sender.sendMessage(languageManager.generateMessage("removedPronouns"));
+    }
+
+    private void sendTargetRemovedPronouns(CommandSender sender, String player) {
+        Map<String, String> args = new HashMap<>();
+        args.put("player", player);
+        sender.sendMessage(languageManager.generateMessage("removedOthersPronouns", args));
     }
 
     private void sendInvalidUsageCustomMessage(CommandSender sender) {
