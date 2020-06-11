@@ -9,11 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,38 +35,41 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     public void onEnable() {
         // Plugin startup logic
         ConfigurationSerialization.registerClass(PronounSet.class);
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) new ChatPronounsPAPIHook(this).register();
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
+            new ChatPronounsPAPIHook(this).register();
 
         languageManager = new LanguageManager(this, "lang.yml");
 
         storage = new YamlConfiguration();
         storageFile = new File(getDataFolder(), "storage.yml");
-        if (!storageFile.exists()) { saveResource("storage.yml", false); }
+        if (!storageFile.exists()) saveResource("storage.yml", false);
 
         config = new YamlConfiguration();
         configFile = new File(getDataFolder(), "config.yml");
-        if (!configFile.exists()) { saveResource("config.yml", false); }
+        if (!configFile.exists()) saveResource("config.yml", false);
 
         useHover = config.getBoolean("use-hover");
 
-        try { storage.load(storageFile); }
-        catch (InvalidConfigurationException | IOException e) { e.printStackTrace();}
+        try {
+            storage.load(storageFile);
+        } catch (InvalidConfigurationException | IOException e) {
+            e.printStackTrace();
+        }
 
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("setpronouns").setExecutor(this);
         getCommand("setcustompronouns").setExecutor(this);
-
-    }
-
-    @Override
-    public void onDisable() {
-
     }
 
     @EventHandler
     public void chatEvent(AsyncPlayerChatEvent chatEvent) {
+        if (!config.getBoolean("modify-chat")) {
+            return;
+        }
         PronounSet pronouns = getPronouns(chatEvent.getPlayer());
-        if (pronouns == null) { return; }
+        if (pronouns == null) {
+            return;
+        }
 
         if (useHover) {
             String format = languageManager.getFormattedString("chatFormat");
@@ -89,9 +90,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
             if (!chatEvent.isCancelled()) {
                 chatEvent.setCancelled(true);
-                for (Player player : getServer().getOnlinePlayers()) {
-                    player.spigot().sendMessage(component);
-                }
+                for (Player player : getServer().getOnlinePlayers()) player.spigot().sendMessage(component);
             }
         } else {
             chatEvent.setFormat(ChatColor.translateAlternateColorCodes('&', "&f[" + pronouns.miniatureString + "&f] &r") + chatEvent.getFormat());
@@ -103,10 +102,16 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         switch (command.getName().toLowerCase()) {
             case "setpronouns":
                 Player target = (Player) sender;
-                if (args.length < 1) { sendInvalidUsageMessage(sender); return true; }
+                if (args.length < 1) {
+                    sendInvalidUsageMessage(sender);
+                    return true;
+                }
                 if (args.length == 2 && sender.hasPermission("chatpronouns.others")) {
                     target = getServer().getPlayer(args[1]);
-                    if (target == null) { sendInvalidPlayer(sender, args[1]); return true; }
+                    if (target == null) {
+                        sendInvalidPlayer(sender, args[1]);
+                        return true;
+                    }
                 }
                 switch (args[0].toLowerCase()) {
                     case "f":
@@ -125,31 +130,46 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                         sendInvalidUsageMessage(sender);
                         break;
                 }
-            return true;
-        case "setcustompronouns":
-            if (args.length < 3) { sendInvalidUsageCustomMessage(sender); return true; }
-            Player player = getServer().getPlayer(args[0]);
-            if (player == null) { sendInvalidUsageCustomMessage(sender); return true; }
-            setPronouns(player, new PronounSet(args[1], args[2]));
-            sendSetPronounMessage(player, args[2]);
-            sendSetPronounOthersMessage(sender, player, args[2]);
-            return true;
-        case "removepronouns":
-            Player cmdTarget = (Player) sender;
-            if (args.length == 1 && sender.hasPermission("chatpronouns.others")) {
-                cmdTarget = getServer().getPlayer(args[0]);
-                if (cmdTarget == null) { sendInvalidPlayer(sender, args[0]); return true; }
-            }
-            removePronouns(cmdTarget);
-            if (cmdTarget == sender) { sendRemovedPronouns(sender); }
-            else { sendRemovedPronouns(cmdTarget); sendTargetRemovedPronouns(sender, args[0]); }
+                return true;
+            case "setcustompronouns":
+                if (args.length < 3) {
+                    sendInvalidUsageCustomMessage(sender);
+                    return true;
+                }
+                Player player = getServer().getPlayer(args[0]);
+                if (player == null) {
+                    sendInvalidUsageCustomMessage(sender);
+                    return true;
+                }
+                setPronouns(player, new PronounSet(args[1], args[2]));
+                sendSetPronounMessage(player, args[2]);
+                sendSetPronounOthersMessage(sender, player, args[2]);
+                return true;
+            case "removepronouns":
+                Player cmdTarget = (Player) sender;
+                if (args.length == 1 && sender.hasPermission("chatpronouns.others")) {
+                    cmdTarget = getServer().getPlayer(args[0]);
+                    if (cmdTarget == null) {
+                        sendInvalidPlayer(sender, args[0]);
+                        return true;
+                    }
+                }
+                removePronouns(cmdTarget);
+                if (cmdTarget == sender) {
+                    sendRemovedPronouns(sender);
+                } else {
+                    sendRemovedPronouns(cmdTarget);
+                    sendTargetRemovedPronouns(sender, args[0]);
+                }
         }
         return true;
     }
 
     public PronounSet getPronouns(Player player) {
         Object key = storage.get("" + player.getUniqueId());
-        if (key == null) { return null; }
+        if (key == null) {
+            return null;
+        }
         return storage.getSerializable("" + player.getUniqueId(), PronounSet.class);
     }
 
@@ -208,7 +228,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         args.put("player", player.getName());
         sender.sendMessage(languageManager.generateMessage("setOthersPronouns", args));
     }
-
 
 
 }
