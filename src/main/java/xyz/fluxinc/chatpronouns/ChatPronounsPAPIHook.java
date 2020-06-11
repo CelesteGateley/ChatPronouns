@@ -1,6 +1,7 @@
 package xyz.fluxinc.chatpronouns;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class ChatPronounsPAPIHook extends PlaceholderExpansion {
@@ -39,8 +40,9 @@ public class ChatPronounsPAPIHook extends PlaceholderExpansion {
         if (pronouns == null) return "";
 
         switch (identifier) {
-            case "minimum_pronouns": return pronouns.miniatureString;
+            case "miniature_tag": return pronouns.miniatureString;
             case "hover_pronouns": return pronouns.hoverText;
+            case "tag": return "[" + pronouns.miniatureString + ChatColor.WHITE + "] ";
             default: return "";
         }
     }
