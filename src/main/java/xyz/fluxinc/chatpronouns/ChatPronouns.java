@@ -37,6 +37,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     public void onEnable() {
         // Plugin startup logic
         ConfigurationSerialization.registerClass(PronounSet.class);
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) new ChatPronounsPAPIHook(this).register();
 
         languageManager = new LanguageManager(this, "lang.yml");
 
@@ -56,6 +57,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("setpronouns").setExecutor(this);
         getCommand("setcustompronouns").setExecutor(this);
+
     }
 
     @Override
@@ -145,7 +147,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         return true;
     }
 
-    private PronounSet getPronouns(Player player) {
+    public PronounSet getPronouns(Player player) {
         Object key = storage.get("" + player.getUniqueId());
         if (key == null) { return null; }
         return storage.getSerializable("" + player.getUniqueId(), PronounSet.class);
@@ -207,31 +209,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         sender.sendMessage(languageManager.generateMessage("setOthersPronouns", args));
     }
 
-    public static class PronounSet implements ConfigurationSerializable {
 
-        private String miniatureString;
-        private String hoverText;
-
-        public PronounSet(Map<String, Object> serializedSet) {
-            this.miniatureString = (String) serializedSet.get("minVersion");
-            this.hoverText = (String) serializedSet.get("hoverText");
-
-        }
-
-        public PronounSet(String miniatureString, String hoverText) {
-            this.miniatureString = miniatureString;
-            this.hoverText = hoverText;
-        }
-
-        @Override
-        public Map<String, Object> serialize() {
-            Map<String, Object> mapSerializer = new HashMap<>();
-
-            mapSerializer.put("minVersion", miniatureString);
-            mapSerializer.put("hoverText", hoverText);
-
-            return mapSerializer;
-        }
-    }
 
 }
