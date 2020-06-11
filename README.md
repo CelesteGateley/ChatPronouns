@@ -7,6 +7,11 @@ using `/setpronouns (m/f/n)`. Staff members can set another person's pronouns us
 
 Staff members can also set customized pronouns on a per-user basis, using `/setcustompronouns (name) (tag) (description)`
 
+## Permissions
+
+The plugin has two permissions `chatpronouns.custom`, giving the user access to the `/setcustompermissions` command, and 
+`chatpronouns.other` allowing the user to set another persons pronouns.
+
 ## PlaceholderAPI
 
 The plugin supports PlaceholderAPI, with 3 valid placeholders:
