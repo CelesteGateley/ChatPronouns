@@ -2,3 +2,4 @@ use-hover: true
 modify-chat: true
 prompt-on-join: true
 update-old-data: true
+broadcast-change: true

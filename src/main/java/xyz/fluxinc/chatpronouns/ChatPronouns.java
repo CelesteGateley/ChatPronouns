@@ -42,6 +42,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
     private boolean useHover;
     private boolean promptOnJoin;
+    private boolean broadcast;
 
     private final PronounSet female = new PronounSet("&dF", "She/Her");
     private final PronounSet male = new PronounSet("&bM", "He/Him");
@@ -102,6 +103,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
         useHover = config.getBoolean("use-hover");
         promptOnJoin = config.getBoolean("prompt-on-join");
+        broadcast = config.getBoolean("broadcast-change");
 
         if (config.getBoolean("update-old-data")) {
             for (String key : storage.getKeys(false)) {
@@ -288,6 +290,12 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
     private void setPronouns(Player player, PronounSet pronounSet) {
         storage.set("" + player.getUniqueId(), new UserData(pronounSet));
+        if (broadcast) {
+            Map<String, String> args = new HashMap<>();
+            args.put("displayname", player.getDisplayName());
+            args.put("pronouns", pronounSet.hoverText);
+            getServer().broadcastMessage(languageManager.generateMessage("broadcastMessage", args));
+        }
         try {
             storage.save(storageFile);
         } catch (IOException e) {
