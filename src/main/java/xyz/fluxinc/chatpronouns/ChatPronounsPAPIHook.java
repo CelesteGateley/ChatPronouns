@@ -42,6 +42,8 @@ public class ChatPronounsPAPIHook extends PlaceholderExpansion {
         switch (identifier) {
             case "miniature_tag": return pronouns.miniatureString;
             case "hover_pronouns": return pronouns.hoverText;
+            case "full_hover": return "Pronouns: " + pronouns.hoverText;
+            case "full_hover_new": return "\nPronouns: " + pronouns.hoverText;
             case "tag": return "[" + pronouns.miniatureString + ChatColor.WHITE + "] ";
             default: return "";
         }
