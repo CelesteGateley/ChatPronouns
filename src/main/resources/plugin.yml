@@ -4,6 +4,7 @@ main: xyz.fluxinc.chatpronouns.ChatPronouns
 api-version: 1.13
 description: Shows a players pronouns in chat, if they have them set
 depends: FluxCore
+author: [CelesteMagisteel]
 commands:
   setpronouns:
     usage: /setpronouns <f/m/n> [player]
