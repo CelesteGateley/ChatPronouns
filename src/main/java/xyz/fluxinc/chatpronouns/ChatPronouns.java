@@ -240,7 +240,9 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     @EventHandler
     public void onInventoryCloseEvent(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player && hasOpenInventory.contains((Player) event.getPlayer())) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> event.getPlayer().openInventory(graphicalInterface), 1);
+            //Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> event.getPlayer().openInventory(graphicalInterface), 10);
+            removePronouns((Player) event.getPlayer());
+            hasOpenInventory.remove((Player) event.getPlayer());
         }
     }
 
@@ -275,7 +277,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                     player.closeInventory();
                     return;
                 default:
-                    return;
             }
         }
     }
