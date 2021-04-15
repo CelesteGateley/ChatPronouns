@@ -232,8 +232,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         if (!promptOnJoin) return;
         UserData data = (UserData) storage.get(event.getPlayer().getUniqueId().toString());
         if (data == null || !data.doNotPrompt) {
-            event.getPlayer().openInventory(graphicalInterface);
-            hasOpenInventory.add(event.getPlayer());
+            event.getPlayer().sendMessage(languageManager.generateMessage("pronounsNotSet"));
         }
     }
 
