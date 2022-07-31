@@ -1,4 +1,4 @@
-package xyz.fluxinc.chatpronouns;
+package xyz.fluxinc.chatpronouns.storage;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 

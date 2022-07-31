@@ -3,6 +3,7 @@ package xyz.fluxinc.chatpronouns;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import xyz.fluxinc.chatpronouns.storage.PronounSet;
 
 public class ChatPronounsPAPIHook extends PlaceholderExpansion {
 

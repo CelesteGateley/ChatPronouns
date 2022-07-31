@@ -23,6 +23,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.fluxinc.chatpronouns.storage.PronounSet;
+import xyz.fluxinc.chatpronouns.storage.StorageManager;
+import xyz.fluxinc.chatpronouns.storage.UserData;
 import xyz.fluxinc.fluxcore.configuration.LanguageManager;
 
 import java.io.File;
@@ -31,13 +34,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @SuppressWarnings("NullPointerException")
 public final class ChatPronouns extends JavaPlugin implements Listener, CommandExecutor {
 
-    private YamlConfiguration storage;
+    private StorageManager storageManager;
     private YamlConfiguration config;
-    private File storageFile;
     private LanguageManager<ChatPronouns> languageManager;
 
     private boolean useHover;
@@ -74,8 +77,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         }
     }
 
-
-
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -86,16 +87,15 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
         languageManager = new LanguageManager<>(this, "lang.yml");
 
-        storage = new YamlConfiguration();
-        storageFile = new File(getDataFolder(), "storage.yml");
+        File storageFile = new File(getDataFolder(), "storage.yml");
         if (!storageFile.exists()) saveResource("storage.yml", false);
+        try { storageManager = new StorageManager(storageFile); } catch (IOException | InvalidConfigurationException e) { throw new RuntimeException(e); }
 
         config = new YamlConfiguration();
         File configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) saveResource("config.yml", false);
 
         try {
-            storage.load(storageFile);
             config.load(configFile);
         } catch (InvalidConfigurationException | IOException e) {
             e.printStackTrace();
@@ -104,15 +104,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         useHover = config.getBoolean("use-hover");
         promptOnJoin = config.getBoolean("prompt-on-join");
         broadcast = config.getBoolean("broadcast-change");
-
-        if (config.getBoolean("update-old-data")) {
-            for (String key : storage.getKeys(false)) {
-                if (storage.get(key) instanceof PronounSet) {
-                    storage.set(key, new UserData((PronounSet) storage.get(key)));
-                }
-            }
-            try { storage.save(storageFile); } catch (IOException e) { e.printStackTrace(); }
-        }
 
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("setpronouns").setExecutor(this);
@@ -174,17 +165,29 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                 }
                 switch (args[0].toLowerCase()) {
                     case "f":
-                        setPronouns(target, female);
+                        try {
+                            setPronouns(target, female);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                         sendSetPronounMessage(target, "She/Her");
                         if (target != sender) { sentTargetSetPronouns(sender, ((Player) sender).getDisplayName(), "She/Her"); }
                         break;
                     case "m":
-                        setPronouns(target, male);
+                        try {
+                            setPronouns(target, male);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                         sendSetPronounMessage(target, "He/Him");
                         if (target != sender) { sentTargetSetPronouns(sender, ((Player) sender).getDisplayName(), "He/Him"); }
                         break;
                     case "n":
-                        setPronouns(target, nonBinary);
+                        try {
+                            setPronouns(target, nonBinary);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                         sendSetPronounMessage(target, "They/Them");
                         if (target != sender) { sentTargetSetPronouns(sender, ((Player) sender).getDisplayName(), "They/Them"); }
                         break;
@@ -203,7 +206,11 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                     sendInvalidUsageCustomMessage(sender);
                     return true;
                 }
-                setPronouns(player, new PronounSet(args[1], args[2]));
+                try {
+                    setPronouns(player, new PronounSet(args[1], args[2]));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 sendSetPronounMessage(player, args[2]);
                 sendSetPronounOthersMessage(sender, player, args[2]);
                 return true;
@@ -216,7 +223,11 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
                         return true;
                     }
                 }
-                removePronouns(cmdTarget);
+                try {
+                    removePronouns(cmdTarget);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 if (cmdTarget == sender) {
                     sendRemovedPronouns(sender);
                 } else {
@@ -230,14 +241,14 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (!promptOnJoin) return;
-        UserData data = (UserData) storage.get(event.getPlayer().getUniqueId().toString());
+        UserData data = storageManager.getUserData(event.getPlayer());
         if (data == null || !data.doNotPrompt) {
             event.getPlayer().sendMessage(languageManager.generateMessage("pronounsNotSet"));
         }
     }
 
     @EventHandler
-    public void onInventoryCloseEvent(InventoryCloseEvent event) {
+    public void onInventoryCloseEvent(InventoryCloseEvent event) throws IOException {
         if (event.getPlayer() instanceof Player && hasOpenInventory.contains((Player) event.getPlayer())) {
             //Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> event.getPlayer().openInventory(graphicalInterface), 10);
             removePronouns((Player) event.getPlayer());
@@ -246,7 +257,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) throws IOException {
         if (event.getWhoClicked() instanceof Player) {
             Player player = (Player) event.getWhoClicked();
             if (!hasOpenInventory.contains(player)) return;
@@ -281,35 +292,22 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     }
 
     public PronounSet getPronouns(Player player) {
-        Object key = storage.get("" + player.getUniqueId());
-        if (key == null || storage.getSerializable("" + player.getUniqueId(), UserData.class) == null) {
-            return null;
-        }
-        return storage.getSerializable("" + player.getUniqueId(), UserData.class).pronouns;
+        return storageManager.getUserData(player).pronouns;
     }
 
-    private void setPronouns(Player player, PronounSet pronounSet) {
-        storage.set("" + player.getUniqueId(), new UserData(pronounSet));
+    private void setPronouns(Player player, PronounSet pronounSet) throws IOException {
+        storageManager.setPronouns(player, pronounSet);
         if (broadcast) {
             Map<String, String> args = new HashMap<>();
             args.put("displayname", player.getDisplayName());
             args.put("pronouns", pronounSet.hoverText);
             getServer().broadcastMessage(languageManager.generateMessage("broadcastMessage", args));
         }
-        try {
-            storage.save(storageFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
-    private void removePronouns(Player player) {
-        storage.set("" + player.getUniqueId(), new UserData(true));
-        try {
-            storage.save(storageFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void removePronouns(Player player) throws IOException {
+        storageManager.setPronouns(player, null);
     }
 
     private void sendSetPronounMessage(CommandSender sender, String pronouns) {
