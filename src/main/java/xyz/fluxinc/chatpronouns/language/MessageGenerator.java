@@ -1,7 +1,5 @@
 package xyz.fluxinc.chatpronouns.language;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import xyz.fluxinc.chatpronouns.ChatPronouns;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
@@ -40,9 +38,10 @@ public class MessageGenerator extends LanguageManager<ChatPronouns> {
         return this.generateMessage("removedPronouns");
     }
 
-    public String generateTargetRemovedPronouns(String player) {
+    public String generateTargetRemovedPronouns(Player player) {
         Map<String, String> args = new HashMap<>();
-        args.put("player", player);
+        args.put("player", player.getName());
+        args.put("display", player.getDisplayName());
         return this.generateMessage("removedOthersPronouns", args);
     }
 

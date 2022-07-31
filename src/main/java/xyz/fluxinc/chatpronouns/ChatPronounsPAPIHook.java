@@ -7,7 +7,7 @@ import xyz.fluxinc.chatpronouns.storage.PronounSet;
 
 public class ChatPronounsPAPIHook extends PlaceholderExpansion {
 
-    private ChatPronouns instance;
+    private final ChatPronouns instance;
 
     public ChatPronounsPAPIHook(ChatPronouns instance) {
         this.instance = instance;
@@ -37,7 +37,7 @@ public class ChatPronounsPAPIHook extends PlaceholderExpansion {
     @Override
     public String onPlaceholderRequest(Player player, String identifier) {
         if (player == null) return "";
-        PronounSet pronouns = instance.getPronouns(player);
+        PronounSet pronouns = instance.getStorageManager().getUserData(player).pronouns;
         if (pronouns == null) return "";
 
         switch (identifier) {

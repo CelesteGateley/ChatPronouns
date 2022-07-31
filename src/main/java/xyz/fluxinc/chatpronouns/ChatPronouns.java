@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.fluxinc.chatpronouns.commands.RemovePronounsCommand;
 import xyz.fluxinc.chatpronouns.commands.SetCustomCommand;
 import xyz.fluxinc.chatpronouns.commands.SetPronounsCommand;
 import xyz.fluxinc.chatpronouns.listeners.ChatFormatListener;
@@ -83,7 +84,11 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
         File storageFile = new File(getDataFolder(), "storage.yml");
         if (!storageFile.exists()) saveResource("storage.yml", false);
-        try { storageManager = new StorageManager(storageFile); } catch (IOException | InvalidConfigurationException e) { throw new RuntimeException(e); }
+        try {
+            storageManager = new StorageManager(storageFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            throw new RuntimeException(e);
+        }
 
         config = new YamlConfiguration();
         File configFile = new File(getDataFolder(), "config.yml");
@@ -100,8 +105,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         broadcast = config.getBoolean("broadcast-change");
 
         inventorySelector = new InventorySelector(this, male, female, nonBinary);
-
-        getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(inventorySelector, this);
 
         if (config.getBoolean("modify-chat")) {
@@ -114,56 +117,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
         new SetPronounsCommand(this, male, female, nonBinary);
         new SetCustomCommand(this);
+        new RemovePronounsCommand(this);
     }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if ("removepronouns".equalsIgnoreCase(command.getName())) {
-            Player cmdTarget = (Player) sender;
-            if (args.length == 1 && sender.hasPermission("chatpronouns.others")) {
-                cmdTarget = getServer().getPlayer(args[0]);
-                if (cmdTarget == null) {
-                    sendInvalidPlayer(sender, args[0]);
-                    return true;
-                }
-            }
-            try {
-                removePronouns(cmdTarget);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            if (cmdTarget == sender) {
-                sendRemovedPronouns(sender);
-            } else {
-                sendRemovedPronouns(cmdTarget);
-                sendTargetRemovedPronouns(sender, args[0]);
-            }
-        }
-        return true;
-    }
-
-    public PronounSet getPronouns(Player player) {
-        return storageManager.getUserData(player).pronouns;
-    }
-
-    private void removePronouns(Player player) throws IOException {
-        storageManager.setPronouns(player, null);
-    }
-
-    private void sendInvalidPlayer(CommandSender sender, String player) {
-        Map<String, String> args = new HashMap<>();
-        args.put("player", player);
-        sender.sendMessage(languageManager.generateMessage("unknownPlayer", args));
-    }
-
-    private void sendRemovedPronouns(CommandSender sender) {
-        sender.sendMessage(languageManager.generateMessage("removedPronouns"));
-    }
-
-    private void sendTargetRemovedPronouns(CommandSender sender, String player) {
-        Map<String, String> args = new HashMap<>();
-        args.put("player", player);
-        sender.sendMessage(languageManager.generateMessage("removedOthersPronouns", args));
-    }
-
 }
