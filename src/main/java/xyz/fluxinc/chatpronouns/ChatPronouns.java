@@ -3,9 +3,7 @@ package xyz.fluxinc.chatpronouns;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,29 +13,21 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.fluxinc.chatpronouns.commands.SetPronounsCommand;
-import xyz.fluxinc.chatpronouns.events.InventorySelector;
+import xyz.fluxinc.chatpronouns.listeners.ChatFormatListener;
+import xyz.fluxinc.chatpronouns.listeners.InventorySelector;
 import xyz.fluxinc.chatpronouns.language.MessageGenerator;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
 import xyz.fluxinc.chatpronouns.storage.StorageManager;
 import xyz.fluxinc.chatpronouns.storage.UserData;
-import xyz.fluxinc.fluxcore.configuration.LanguageManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 @SuppressWarnings("NullPointerException")
 public final class ChatPronouns extends JavaPlugin implements Listener, CommandExecutor {
@@ -116,44 +106,12 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(inventorySelector, this);
 
+        if (config.getBoolean("modify-chat")) {
+            getServer().getPluginManager().registerEvents(new ChatFormatListener(this), this);
+        }
+
         new SetPronounsCommand(this, male, female, nonBinary);
         getCommand("setcustompronouns").setExecutor(this);
-    }
-
-    @EventHandler
-    public void chatEvent(AsyncPlayerChatEvent chatEvent) {
-        if (!config.getBoolean("modify-chat")) {
-            return;
-        }
-        PronounSet pronouns = getPronouns(chatEvent.getPlayer());
-        if (pronouns == null) {
-            return;
-        }
-
-        if (useHover) {
-            String format = languageManager.getFormattedString("chatFormat");
-            format = format.replace("%display%", chatEvent.getPlayer().getDisplayName());
-            format = format.replace("%player%", chatEvent.getPlayer().getName());
-            format = format.replace("%message%", chatEvent.getMessage());
-
-
-            TextComponent component = new TextComponent();
-            TextComponent mainComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', format));
-
-            TextComponent prefixComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', "&f[" + pronouns.miniatureString + "&f]"));
-            prefixComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(pronouns.hoverText).create()));
-            component.addExtra(prefixComponent);
-            component.addExtra(" ");
-
-            component.addExtra(mainComponent);
-
-            if (!chatEvent.isCancelled()) {
-                chatEvent.setCancelled(true);
-                for (Player player : getServer().getOnlinePlayers()) player.spigot().sendMessage(component);
-            }
-        } else {
-            chatEvent.setFormat(ChatColor.translateAlternateColorCodes('&', "&f[" + pronouns.miniatureString + "&f] &r") + chatEvent.getFormat());
-        }
     }
 
     @Override

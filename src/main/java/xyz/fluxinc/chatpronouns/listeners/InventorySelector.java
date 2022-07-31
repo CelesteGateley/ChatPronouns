@@ -1,4 +1,4 @@
-package xyz.fluxinc.chatpronouns.events;
+package xyz.fluxinc.chatpronouns.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
