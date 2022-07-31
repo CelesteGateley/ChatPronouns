@@ -1,27 +1,17 @@
 package xyz.fluxinc.chatpronouns;
 
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.fluxinc.chatpronouns.commands.RemovePronounsCommand;
 import xyz.fluxinc.chatpronouns.commands.SetCustomCommand;
 import xyz.fluxinc.chatpronouns.commands.SetPronounsCommand;
+import xyz.fluxinc.chatpronouns.language.MessageGenerator;
 import xyz.fluxinc.chatpronouns.listeners.ChatFormatListener;
 import xyz.fluxinc.chatpronouns.listeners.InventorySelector;
-import xyz.fluxinc.chatpronouns.language.MessageGenerator;
 import xyz.fluxinc.chatpronouns.listeners.JoinPromptListener;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
 import xyz.fluxinc.chatpronouns.storage.StorageManager;
@@ -29,23 +19,18 @@ import xyz.fluxinc.chatpronouns.storage.UserData;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @SuppressWarnings("NullPointerException")
 public final class ChatPronouns extends JavaPlugin implements Listener, CommandExecutor {
 
-    private StorageManager storageManager;
-    private YamlConfiguration config;
-    private MessageGenerator languageManager;
-
-    private boolean useHover;
-    private boolean promptOnJoin;
-    private boolean broadcast;
-
     private final PronounSet female = new PronounSet("&dF", "She/Her");
     private final PronounSet male = new PronounSet("&bM", "He/Him");
     private final PronounSet nonBinary = new PronounSet("&fN", "They/Them");
+    private StorageManager storageManager;
+    private YamlConfiguration config;
+    private MessageGenerator languageManager;
+    private boolean useHover;
+    private boolean broadcast;
     private InventorySelector inventorySelector;
 
     public MessageGenerator getLanguageManager() {
@@ -101,7 +86,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         }
 
         useHover = config.getBoolean("use-hover");
-        promptOnJoin = config.getBoolean("prompt-on-join");
         broadcast = config.getBoolean("broadcast-change");
 
         inventorySelector = new InventorySelector(this, male, female, nonBinary);

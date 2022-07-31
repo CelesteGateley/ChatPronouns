@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MessageGenerator extends LanguageManager<ChatPronouns> {
-    
+
     public MessageGenerator(ChatPronouns plugin, String langFile) {
         super(plugin, langFile);
     }

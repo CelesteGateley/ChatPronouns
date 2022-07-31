@@ -32,7 +32,7 @@ public class InventorySelector implements Listener {
         this.nonbinary = nonbinary;
         this.open = new ArrayList<>();
     }
-    
+
     public void showInventory(Player player) {
         this.open.add(player);
         player.openInventory(this.getInventory());
@@ -85,13 +85,21 @@ public class InventorySelector implements Listener {
     private Inventory getInventory() {
         Inventory graphicalInterface = Bukkit.createInventory(null, 27, "Select Your Pronouns");
         ItemStack male = new ItemStack(Material.LIGHT_BLUE_WOOL);
-        ItemMeta maleMeta = male.getItemMeta(); maleMeta.setDisplayName("Male"); male.setItemMeta(maleMeta);
+        ItemMeta maleMeta = male.getItemMeta();
+        maleMeta.setDisplayName("Male");
+        male.setItemMeta(maleMeta);
         ItemStack female = new ItemStack(Material.PINK_WOOL);
-        ItemMeta femaleMeta = female.getItemMeta(); femaleMeta.setDisplayName("Female"); female.setItemMeta(femaleMeta);
+        ItemMeta femaleMeta = female.getItemMeta();
+        femaleMeta.setDisplayName("Female");
+        female.setItemMeta(femaleMeta);
         ItemStack nb = new ItemStack(Material.WHITE_WOOL);
-        ItemMeta nbMeta = nb.getItemMeta(); nbMeta.setDisplayName("Non-Binary"); nb.setItemMeta(nbMeta);
+        ItemMeta nbMeta = nb.getItemMeta();
+        nbMeta.setDisplayName("Non-Binary");
+        nb.setItemMeta(nbMeta);
         ItemStack unset = new ItemStack(Material.BARRIER);
-        ItemMeta unsetMeta = unset.getItemMeta(); unsetMeta.setDisplayName("Rather Not Say"); unset.setItemMeta(unsetMeta);
+        ItemMeta unsetMeta = unset.getItemMeta();
+        unsetMeta.setDisplayName("Rather Not Say");
+        unset.setItemMeta(unsetMeta);
         for (int i = 0; i < 27; i++) {
             if (i == 10) {
                 graphicalInterface.setItem(i, male);
@@ -106,5 +114,5 @@ public class InventorySelector implements Listener {
             }
         }
         return graphicalInterface;
-}
+    }
 }

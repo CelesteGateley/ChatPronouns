@@ -1,7 +1,6 @@
 package xyz.fluxinc.chatpronouns.commands;
 
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import xyz.fluxinc.chatpronouns.ChatPronouns;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
@@ -11,8 +10,8 @@ import java.io.IOException;
 
 public class SetPronounsCommand {
 
-    private final ChatPronouns instance;
     private static final String cmd = "setpronouns";
+    private final ChatPronouns instance;
     private final PronounSet male;
     private final PronounSet female;
     private final PronounSet nonbinary;

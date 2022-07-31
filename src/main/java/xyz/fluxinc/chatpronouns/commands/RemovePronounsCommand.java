@@ -8,8 +8,8 @@ import java.io.IOException;
 
 public class RemovePronounsCommand {
 
-    private final ChatPronouns instance;
     private static final String cmd = "removepronouns";
+    private final ChatPronouns instance;
 
     public RemovePronounsCommand(ChatPronouns instance) {
         this.instance = instance;

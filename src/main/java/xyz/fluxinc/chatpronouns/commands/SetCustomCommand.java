@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public class SetCustomCommand {
 
-    private final ChatPronouns instance;
     private static final String cmd = "setcustompronouns";
+    private final ChatPronouns instance;
 
     public SetCustomCommand(ChatPronouns instance) {
         this.instance = instance;
@@ -29,7 +29,7 @@ public class SetCustomCommand {
                 return;
             }
             try {
-                PronounSet set =  new PronounSet((String) args[1], (String) args[2]);
+                PronounSet set = new PronounSet((String) args[1], (String) args[2]);
                 instance.getStorageManager().setPronouns(player, set);
                 player.sendMessage(instance.getLanguageManager().generateSetPronounMessage(set));
                 sender.sendMessage(instance.getLanguageManager().generateTargetSetPronouns(player, set));
