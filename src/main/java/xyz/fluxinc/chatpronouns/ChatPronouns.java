@@ -23,6 +23,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.fluxinc.chatpronouns.commands.SetPronounsCommand;
 import xyz.fluxinc.chatpronouns.events.InventorySelector;
 import xyz.fluxinc.chatpronouns.language.MessageGenerator;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
@@ -114,7 +115,8 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(inventorySelector, this);
-        getCommand("setpronouns").setExecutor(this);
+
+        new SetPronounsCommand(this, male, female, nonBinary);
         getCommand("setcustompronouns").setExecutor(this);
     }
 
@@ -157,52 +159,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         switch (command.getName().toLowerCase()) {
-            case "setpronouns":
-                Player target = (Player) sender;
-                if (args.length < 1) {
-                    inventorySelector.showInventory(target);
-                    return true;
-                }
-                if (args.length == 2 && sender.hasPermission("chatpronouns.others")) {
-                    target = getServer().getPlayer(args[1]);
-                    if (target == null) {
-                        sendInvalidPlayer(sender, args[1]);
-                        return true;
-                    }
-                }
-                switch (args[0].toLowerCase()) {
-                    case "f":
-                        try {
-                            setPronouns(target, female);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        sendSetPronounMessage(target, "She/Her");
-                        if (target != sender) { sentTargetSetPronouns(sender, ((Player) sender).getDisplayName(), "She/Her"); }
-                        break;
-                    case "m":
-                        try {
-                            setPronouns(target, male);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        sendSetPronounMessage(target, "He/Him");
-                        if (target != sender) { sentTargetSetPronouns(sender, ((Player) sender).getDisplayName(), "He/Him"); }
-                        break;
-                    case "n":
-                        try {
-                            setPronouns(target, nonBinary);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        sendSetPronounMessage(target, "They/Them");
-                        if (target != sender) { sentTargetSetPronouns(sender, ((Player) sender).getDisplayName(), "They/Them"); }
-                        break;
-                    default:
-                        sendInvalidUsageMessage(sender);
-                        break;
-                }
-                return true;
             case "setcustompronouns":
                 if (args.length < 3) {
                     sendInvalidUsageCustomMessage(sender);
