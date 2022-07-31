@@ -23,6 +23,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.fluxinc.chatpronouns.events.InventorySelector;
 import xyz.fluxinc.chatpronouns.language.MessageGenerator;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
 import xyz.fluxinc.chatpronouns.storage.StorageManager;
@@ -51,31 +52,34 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     private final PronounSet female = new PronounSet("&dF", "She/Her");
     private final PronounSet male = new PronounSet("&bM", "He/Him");
     private final PronounSet nonBinary = new PronounSet("&fN", "They/Them");
+    private InventorySelector inventorySelector;
 
-    private static final Inventory graphicalInterface = Bukkit.createInventory(null, 27, "Select Your Pronouns");
-    private final List<Player> hasOpenInventory = new ArrayList<>();
-    static {
-        ItemStack male = new ItemStack(Material.LIGHT_BLUE_WOOL);
-        ItemMeta maleMeta = male.getItemMeta(); maleMeta.setDisplayName("Male"); male.setItemMeta(maleMeta);
-        ItemStack female = new ItemStack(Material.PINK_WOOL);
-        ItemMeta femaleMeta = female.getItemMeta(); femaleMeta.setDisplayName("Female"); female.setItemMeta(femaleMeta);
-        ItemStack nb = new ItemStack(Material.WHITE_WOOL);
-        ItemMeta nbMeta = nb.getItemMeta(); nbMeta.setDisplayName("Non-Binary"); nb.setItemMeta(nbMeta);
-        ItemStack unset = new ItemStack(Material.BARRIER);
-        ItemMeta unsetMeta = unset.getItemMeta(); unsetMeta.setDisplayName("Rather Not Say"); unset.setItemMeta(unsetMeta);
-        for (int i = 0; i < 27; i++) {
-            if (i == 10) {
-                graphicalInterface.setItem(i, male);
-            } else if (i == 13) {
-                graphicalInterface.setItem(i, nb);
-            } else if (i == 16) {
-                graphicalInterface.setItem(i, female);
-            } else if (i == 22) {
-                graphicalInterface.setItem(i, unset);
-            } else {
-                graphicalInterface.setItem(i, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
-            }
-        }
+    public MessageGenerator getLanguageManager() {
+        return this.languageManager;
+    }
+
+    public StorageManager getStorageManager() {
+        return this.storageManager;
+    }
+
+    public YamlConfiguration getConfiguration() {
+        return this.config;
+    }
+
+    public InventorySelector getInventorySelector() {
+        return this.inventorySelector;
+    }
+
+    public boolean useHover() {
+        return useHover;
+    }
+
+    public boolean shouldPromptOnJoin() {
+        return promptOnJoin;
+    }
+
+    public boolean shouldBroadcast() {
+        return broadcast;
     }
 
     @Override
@@ -106,7 +110,10 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         promptOnJoin = config.getBoolean("prompt-on-join");
         broadcast = config.getBoolean("broadcast-change");
 
+        inventorySelector = new InventorySelector(this, male, female, nonBinary);
+
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(inventorySelector, this);
         getCommand("setpronouns").setExecutor(this);
         getCommand("setcustompronouns").setExecutor(this);
     }
@@ -153,8 +160,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
             case "setpronouns":
                 Player target = (Player) sender;
                 if (args.length < 1) {
-                    ((Player) sender).openInventory(graphicalInterface);
-                    hasOpenInventory.add((Player) sender);
+                    inventorySelector.showInventory(target);
                     return true;
                 }
                 if (args.length == 2 && sender.hasPermission("chatpronouns.others")) {
@@ -245,50 +251,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         UserData data = storageManager.getUserData(event.getPlayer());
         if (data == null || !data.doNotPrompt) {
             event.getPlayer().sendMessage(languageManager.generateMessage("pronounsNotSet"));
-        }
-    }
-
-    @EventHandler
-    public void onInventoryCloseEvent(InventoryCloseEvent event) throws IOException {
-        if (event.getPlayer() instanceof Player && hasOpenInventory.contains((Player) event.getPlayer())) {
-            //Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> event.getPlayer().openInventory(graphicalInterface), 10);
-            removePronouns((Player) event.getPlayer());
-            hasOpenInventory.remove((Player) event.getPlayer());
-        }
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) throws IOException {
-        if (event.getWhoClicked() instanceof Player) {
-            Player player = (Player) event.getWhoClicked();
-            if (!hasOpenInventory.contains(player)) return;
-            event.setCancelled(true);
-            switch (event.getCurrentItem().getType()) {
-                case WHITE_WOOL:
-                    setPronouns(player, nonBinary);
-                    sendSetPronounMessage(player, "They/Them");
-                    hasOpenInventory.remove(player);
-                    player.closeInventory();
-                    return;
-                case LIGHT_BLUE_WOOL:
-                    setPronouns(player, male);
-                    sendSetPronounMessage(player, "He/Him");
-                    hasOpenInventory.remove(player);
-                    player.closeInventory();
-                    return;
-                case PINK_WOOL:
-                    setPronouns(player, female);
-                    sendSetPronounMessage(player, "She/Her");
-                    hasOpenInventory.remove(player);
-                    player.closeInventory();
-                    return;
-                case BARRIER:
-                    removePronouns(player);
-                    hasOpenInventory.remove(player);
-                    player.closeInventory();
-                    return;
-                default:
-            }
         }
     }
 
