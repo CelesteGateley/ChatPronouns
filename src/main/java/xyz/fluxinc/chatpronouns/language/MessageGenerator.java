@@ -70,4 +70,8 @@ public class MessageGenerator extends LanguageManager<ChatPronouns> {
         args.put("player", player.getName());
         return this.generateMessage("setOthersPronouns", args);
     }
+
+    public String generateNoPermissions() {
+        return this.generateMessage("noPermissions");
+    }
 }

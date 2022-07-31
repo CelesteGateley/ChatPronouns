@@ -1,10 +1,8 @@
 package xyz.fluxinc.chatpronouns;
 
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.event.Listener;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.fluxinc.chatpronouns.commands.RemovePronounsCommand;
 import xyz.fluxinc.chatpronouns.commands.SetCustomCommand;
@@ -16,18 +14,19 @@ import xyz.fluxinc.chatpronouns.listeners.JoinPromptListener;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
 import xyz.fluxinc.chatpronouns.storage.StorageManager;
 import xyz.fluxinc.chatpronouns.storage.UserData;
+import xyz.fluxinc.fluxcore.configuration.ConfigurationManager;
 
 import java.io.File;
 import java.io.IOException;
 
 @SuppressWarnings("NullPointerException")
-public final class ChatPronouns extends JavaPlugin implements Listener, CommandExecutor {
+public final class ChatPronouns extends JavaPlugin {
 
     private final PronounSet female = new PronounSet("&dF", "She/Her");
     private final PronounSet male = new PronounSet("&bM", "He/Him");
     private final PronounSet nonBinary = new PronounSet("&fN", "They/Them");
     private StorageManager storageManager;
-    private YamlConfiguration config;
+    private ConfigurationManager<ChatPronouns> config;
     private MessageGenerator languageManager;
     private boolean useHover;
     private boolean broadcast;
@@ -41,7 +40,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         return this.storageManager;
     }
 
-    public YamlConfiguration getConfiguration() {
+    public ConfigurationManager<ChatPronouns> getConfiguration() {
         return this.config;
     }
 
@@ -75,16 +74,19 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
             throw new RuntimeException(e);
         }
 
-        config = new YamlConfiguration();
         File configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) saveResource("config.yml", false);
 
-        try {
-            config.load(configFile);
-        } catch (InvalidConfigurationException | IOException e) {
-            e.printStackTrace();
-        }
+        config = new ConfigurationManager<>(this, "config.yml");
 
+        initialize();
+
+        new SetPronounsCommand(this, male, female, nonBinary);
+        new SetCustomCommand(this);
+        new RemovePronounsCommand(this);
+    }
+
+    public void initialize() {
         useHover = config.getBoolean("use-hover");
         broadcast = config.getBoolean("broadcast-change");
 
@@ -98,9 +100,12 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         if (config.getBoolean("prompt-on-join")) {
             getServer().getPluginManager().registerEvents(new JoinPromptListener(this), this);
         }
+    }
 
-        new SetPronounsCommand(this, male, female, nonBinary);
-        new SetCustomCommand(this);
-        new RemovePronounsCommand(this);
+    public void reload() {
+        HandlerList.unregisterAll(this);
+        languageManager.reloadConfiguration();
+        config.reloadConfiguration();
+        initialize();
     }
 }
