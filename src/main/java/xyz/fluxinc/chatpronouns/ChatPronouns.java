@@ -20,6 +20,7 @@ import xyz.fluxinc.chatpronouns.commands.SetPronounsCommand;
 import xyz.fluxinc.chatpronouns.listeners.ChatFormatListener;
 import xyz.fluxinc.chatpronouns.listeners.InventorySelector;
 import xyz.fluxinc.chatpronouns.language.MessageGenerator;
+import xyz.fluxinc.chatpronouns.listeners.JoinPromptListener;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
 import xyz.fluxinc.chatpronouns.storage.StorageManager;
 import xyz.fluxinc.chatpronouns.storage.UserData;
@@ -65,10 +66,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         return useHover;
     }
 
-    public boolean shouldPromptOnJoin() {
-        return promptOnJoin;
-    }
-
     public boolean shouldBroadcast() {
         return broadcast;
     }
@@ -108,6 +105,10 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
         if (config.getBoolean("modify-chat")) {
             getServer().getPluginManager().registerEvents(new ChatFormatListener(this), this);
+        }
+
+        if (config.getBoolean("prompt-on-join")) {
+            getServer().getPluginManager().registerEvents(new JoinPromptListener(this), this);
         }
 
         new SetPronounsCommand(this, male, female, nonBinary);
@@ -159,15 +160,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         return true;
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!promptOnJoin) return;
-        UserData data = storageManager.getUserData(event.getPlayer());
-        if (data == null || !data.doNotPrompt) {
-            event.getPlayer().sendMessage(languageManager.generateMessage("pronounsNotSet"));
-        }
-    }
-
     public PronounSet getPronouns(Player player) {
         return storageManager.getUserData(player).pronouns;
     }
@@ -205,19 +197,8 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         sender.sendMessage(languageManager.generateMessage("removedOthersPronouns", args));
     }
 
-    private void sentTargetSetPronouns(CommandSender sender, String player, String pronouns) {
-        Map<String, String> args = new HashMap<>();
-        args.put("player", player);
-        args.put("pronouns", pronouns);
-        sender.sendMessage(languageManager.generateMessage("setOthersPronouns", args));
-    }
-
     private void sendInvalidUsageCustomMessage(CommandSender sender) {
         sender.sendMessage(languageManager.generateMessage("invalidUsageCustom"));
-    }
-
-    private void sendInvalidUsageMessage(CommandSender sender) {
-        sender.sendMessage(languageManager.generateMessage("invalidUsage"));
     }
 
     private void sendSetPronounOthersMessage(CommandSender sender, Player player, String pronouns) {
