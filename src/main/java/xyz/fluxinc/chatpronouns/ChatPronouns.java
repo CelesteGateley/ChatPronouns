@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.fluxinc.chatpronouns.commands.SetCustomCommand;
 import xyz.fluxinc.chatpronouns.commands.SetPronounsCommand;
 import xyz.fluxinc.chatpronouns.listeners.ChatFormatListener;
 import xyz.fluxinc.chatpronouns.listeners.InventorySelector;
@@ -112,50 +113,31 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         }
 
         new SetPronounsCommand(this, male, female, nonBinary);
-        getCommand("setcustompronouns").setExecutor(this);
+        new SetCustomCommand(this);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        switch (command.getName().toLowerCase()) {
-            case "setcustompronouns":
-                if (args.length < 3) {
-                    sendInvalidUsageCustomMessage(sender);
+        if ("removepronouns".equalsIgnoreCase(command.getName())) {
+            Player cmdTarget = (Player) sender;
+            if (args.length == 1 && sender.hasPermission("chatpronouns.others")) {
+                cmdTarget = getServer().getPlayer(args[0]);
+                if (cmdTarget == null) {
+                    sendInvalidPlayer(sender, args[0]);
                     return true;
                 }
-                Player player = getServer().getPlayer(args[0]);
-                if (player == null) {
-                    sendInvalidUsageCustomMessage(sender);
-                    return true;
-                }
-                try {
-                    setPronouns(player, new PronounSet(args[1], args[2]));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                sendSetPronounMessage(player, args[2]);
-                sendSetPronounOthersMessage(sender, player, args[2]);
-                return true;
-            case "removepronouns":
-                Player cmdTarget = (Player) sender;
-                if (args.length == 1 && sender.hasPermission("chatpronouns.others")) {
-                    cmdTarget = getServer().getPlayer(args[0]);
-                    if (cmdTarget == null) {
-                        sendInvalidPlayer(sender, args[0]);
-                        return true;
-                    }
-                }
-                try {
-                    removePronouns(cmdTarget);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                if (cmdTarget == sender) {
-                    sendRemovedPronouns(sender);
-                } else {
-                    sendRemovedPronouns(cmdTarget);
-                    sendTargetRemovedPronouns(sender, args[0]);
-                }
+            }
+            try {
+                removePronouns(cmdTarget);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            if (cmdTarget == sender) {
+                sendRemovedPronouns(sender);
+            } else {
+                sendRemovedPronouns(cmdTarget);
+                sendTargetRemovedPronouns(sender, args[0]);
+            }
         }
         return true;
     }
@@ -164,21 +146,8 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         return storageManager.getUserData(player).pronouns;
     }
 
-    private void setPronouns(Player player, PronounSet pronounSet) throws IOException {
-        storageManager.setPronouns(player, pronounSet);
-        if (broadcast) {
-            getServer().broadcastMessage(languageManager.generateBroadcastMessage(player, pronounSet));
-        }
-    }
-
     private void removePronouns(Player player) throws IOException {
         storageManager.setPronouns(player, null);
-    }
-
-    private void sendSetPronounMessage(CommandSender sender, String pronouns) {
-        Map<String, String> args = new HashMap<>();
-        args.put("pronouns", pronouns);
-        sender.sendMessage(languageManager.generateMessage("setPronouns", args));
     }
 
     private void sendInvalidPlayer(CommandSender sender, String player) {
@@ -195,18 +164,6 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         Map<String, String> args = new HashMap<>();
         args.put("player", player);
         sender.sendMessage(languageManager.generateMessage("removedOthersPronouns", args));
-    }
-
-    private void sendInvalidUsageCustomMessage(CommandSender sender) {
-        sender.sendMessage(languageManager.generateMessage("invalidUsageCustom"));
-    }
-
-    private void sendSetPronounOthersMessage(CommandSender sender, Player player, String pronouns) {
-        Map<String, String> args = new HashMap<>();
-        args.put("pronouns", pronouns);
-        args.put("display", player.getDisplayName());
-        args.put("player", player.getName());
-        sender.sendMessage(languageManager.generateMessage("setOthersPronouns", args));
     }
 
 }

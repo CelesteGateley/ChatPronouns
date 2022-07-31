@@ -6,11 +6,6 @@ description: Shows a players pronouns in chat, if they have them set
 depends: FluxCore
 authors: [CelesteMagisteel]
 commands:
-  setpronouns:
-    usage: /setpronouns <f/m/n> [player]
-  setcustompronouns:
-    usage: /setcustompronouns (player) (icon) (pronouns)
-    permission: chatpronouns.custom
   removepronouns:
     usage: /removepronouns [player]
 permissions:

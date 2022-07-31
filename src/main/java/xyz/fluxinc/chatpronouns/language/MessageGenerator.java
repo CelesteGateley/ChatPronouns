@@ -46,9 +46,10 @@ public class MessageGenerator extends LanguageManager<ChatPronouns> {
         return this.generateMessage("removedOthersPronouns", args);
     }
 
-    public String generateTargetSetPronouns(String player, PronounSet pronouns) {
+    public String generateTargetSetPronouns(Player player, PronounSet pronouns) {
         Map<String, String> args = new HashMap<>();
-        args.put("player", player);
+        args.put("player", player.getName());
+        args.put("display", player.getDisplayName());
         args.put("pronouns", pronouns.hoverText);
         args.put("min", pronouns.miniatureString);
         return this.generateMessage("setOthersPronouns", args);
