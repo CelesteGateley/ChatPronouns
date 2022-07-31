@@ -4,38 +4,19 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
+import xyz.fluxinc.fluxcore.hooks.Placeholder;
 
-public class ChatPronounsPAPIHook extends PlaceholderExpansion {
+public class ChatPronounsPAPIHook extends Placeholder {
 
     private final ChatPronouns instance;
 
     public ChatPronounsPAPIHook(ChatPronouns instance) {
+        super(instance);
         this.instance = instance;
     }
 
     @Override
-    public boolean persist(){ return true; }
-
-    @Override
-    public boolean canRegister(){ return true; }
-
-    @Override
-    public String getIdentifier() {
-        return "chatpronouns";
-    }
-
-    @Override
-    public String getAuthor() {
-        return instance.getDescription().getAuthors().get(0);
-    }
-
-    @Override
-    public String getVersion() {
-        return instance.getDescription().getVersion();
-    }
-
-    @Override
-    public String onPlaceholderRequest(Player player, String identifier) {
+    public String placeholder(Player player, String identifier) {
         if (player == null) return "";
         PronounSet pronouns = instance.getStorageManager().getUserData(player).pronouns;
         if (pronouns == null) return "";
