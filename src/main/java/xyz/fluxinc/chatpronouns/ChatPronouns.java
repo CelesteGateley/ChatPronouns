@@ -23,6 +23,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.fluxinc.chatpronouns.language.MessageGenerator;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
 import xyz.fluxinc.chatpronouns.storage.StorageManager;
 import xyz.fluxinc.chatpronouns.storage.UserData;
@@ -41,7 +42,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
 
     private StorageManager storageManager;
     private YamlConfiguration config;
-    private LanguageManager<ChatPronouns> languageManager;
+    private MessageGenerator languageManager;
 
     private boolean useHover;
     private boolean promptOnJoin;
@@ -85,7 +86,7 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
             new ChatPronounsPAPIHook(this).register();
 
-        languageManager = new LanguageManager<>(this, "lang.yml");
+        languageManager = new MessageGenerator(this, "lang.yml");
 
         File storageFile = new File(getDataFolder(), "storage.yml");
         if (!storageFile.exists()) saveResource("storage.yml", false);
@@ -298,12 +299,8 @@ public final class ChatPronouns extends JavaPlugin implements Listener, CommandE
     private void setPronouns(Player player, PronounSet pronounSet) throws IOException {
         storageManager.setPronouns(player, pronounSet);
         if (broadcast) {
-            Map<String, String> args = new HashMap<>();
-            args.put("displayname", player.getDisplayName());
-            args.put("pronouns", pronounSet.hoverText);
-            getServer().broadcastMessage(languageManager.generateMessage("broadcastMessage", args));
+            getServer().broadcastMessage(languageManager.generateBroadcastMessage(player, pronounSet));
         }
-
     }
 
     private void removePronouns(Player player) throws IOException {
