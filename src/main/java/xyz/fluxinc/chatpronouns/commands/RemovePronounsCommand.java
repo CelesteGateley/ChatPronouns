@@ -13,7 +13,22 @@ public class RemovePronounsCommand {
 
     public RemovePronounsCommand(ChatPronouns instance) {
         this.instance = instance;
+        getDefaultCommand().register();
         getRemoveCommand().register();
+    }
+
+    public Command getDefaultCommand() {
+        Command command = new Command(cmd);
+        return command.executor((sender, args) -> {
+            Player cmdTarget = (Player) sender;
+            try {
+                instance.getStorageManager().setPronouns(cmdTarget, null);
+                sender.sendMessage(instance.getLanguageManager().generateRemovedPronouns());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
     }
 
     public Command getRemoveCommand() {
