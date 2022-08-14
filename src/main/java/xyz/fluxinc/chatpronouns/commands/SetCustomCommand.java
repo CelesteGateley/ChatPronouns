@@ -1,5 +1,6 @@
 package xyz.fluxinc.chatpronouns.commands;
 
+import dev.jorel.commandapi.arguments.TextArgument;
 import org.bukkit.entity.Player;
 import xyz.fluxinc.chatpronouns.ChatPronouns;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
@@ -18,7 +19,7 @@ public class SetCustomCommand {
     }
 
     public Command getSetCustomCommand() {
-        Command command = new Command(cmd).player("name").string("pronouns").string("icon");
+        Command command = new Command(cmd).player("name").raw(new TextArgument("pronouns")).raw(new TextArgument("icon"));
         return command.executor((sender, args) -> {
             if (!sender.hasPermission("chatpronouns.custom")) {
                 return;
