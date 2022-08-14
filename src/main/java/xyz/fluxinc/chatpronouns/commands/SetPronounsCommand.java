@@ -1,6 +1,7 @@
 package xyz.fluxinc.chatpronouns.commands;
 
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import xyz.fluxinc.chatpronouns.ChatPronouns;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
@@ -39,31 +40,7 @@ public class SetPronounsCommand {
         Command command = new Command(cmd).raw(new MultiLiteralArgument("male", "female", "non-binary", "unset"));
         return command.executor((sender, args) -> {
             Player target = (Player) sender;
-            PronounSet set = null;
-            switch ((String) args[0]) {
-                case "male":
-                    set = male;
-                    break;
-                case "female":
-                    set = female;
-                    break;
-                case "non-binary":
-                    set = nonbinary;
-                    break;
-            }
-            try {
-                instance.getStorageManager().setPronouns(target, set);
-                if (set != null) {
-                    target.sendMessage(instance.getLanguageManager().generateSetPronounMessage(set));
-                    if (instance.getConfiguration().getBoolean("broadcast-change")) {
-                        instance.getServer().broadcastMessage(instance.getLanguageManager().generateBroadcastMessage(target, set));
-                    }
-                } else {
-                    target.sendMessage(instance.getLanguageManager().generateRemovedPronouns());
-                }
-            } catch (IOException e) {
-                sender.sendMessage("A fatal error has occurred");
-            }
+            setPronouns(sender, target, (String) args[0]);
         });
     }
 
@@ -71,31 +48,35 @@ public class SetPronounsCommand {
         Command command = new Command(cmd).raw(new MultiLiteralArgument("male", "female", "non-binary", "unset")).player("player");
         return command.executor((sender, args) -> {
             Player target = args[1] != null && sender.hasPermission("chatpronouns.others") ? (Player) args[1] : (Player) sender;
-            PronounSet set = null;
-            switch ((String) args[0]) {
-                case "male":
-                    set = male;
-                    break;
-                case "female":
-                    set = female;
-                    break;
-                case "non-binary":
-                    set = nonbinary;
-                    break;
-            }
-            try {
-                instance.getStorageManager().setPronouns(target, set);
-                if (set != null) {
-                    target.sendMessage(instance.getLanguageManager().generateSetPronounMessage(set));
-                    if (instance.getConfiguration().getBoolean("broadcast-change")) {
-                        instance.getServer().broadcastMessage(instance.getLanguageManager().generateBroadcastMessage(target, set));
-                    }
-                } else {
-                    target.sendMessage(instance.getLanguageManager().generateRemovedPronouns());
-                }
-            } catch (IOException e) {
-                sender.sendMessage("A fatal error has occurred");
-            }
+            setPronouns(sender, target, (String) args[0]);
         });
+    }
+
+    private void setPronouns(CommandSender sender, Player target, String pronouns)  {
+        PronounSet set = null;
+        switch (pronouns) {
+            case "male":
+                set = male;
+                break;
+            case "female":
+                set = female;
+                break;
+            case "non-binary":
+                set = nonbinary;
+                break;
+        }
+        try {
+            instance.getStorageManager().setPronouns(target, set);
+            if (set != null) {
+                target.sendMessage(instance.getLanguageManager().generateSetPronounMessage(set));
+                if (instance.getConfiguration().getBoolean("broadcast-change")) {
+                    instance.getServer().broadcastMessage(instance.getLanguageManager().generateBroadcastMessage(target, set));
+                }
+            } else {
+                target.sendMessage(instance.getLanguageManager().generateRemovedPronouns());
+            }
+        } catch (IOException e) {
+            sender.sendMessage("A fatal error has occurred");
+        }
     }
 }
