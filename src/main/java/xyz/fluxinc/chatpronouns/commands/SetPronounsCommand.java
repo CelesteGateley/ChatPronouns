@@ -47,7 +47,7 @@ public class SetPronounsCommand {
                 case "female":
                     set = female;
                     break;
-                case "nonbinary":
+                case "non-binary":
                     set = nonbinary;
                     break;
             }
@@ -79,7 +79,7 @@ public class SetPronounsCommand {
                 case "female":
                     set = female;
                     break;
-                case "nonbinary":
+                case "non-binary":
                     set = nonbinary;
                     break;
             }
