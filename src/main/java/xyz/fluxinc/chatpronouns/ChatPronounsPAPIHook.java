@@ -3,6 +3,7 @@ package xyz.fluxinc.chatpronouns;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
+import xyz.fluxinc.chatpronouns.storage.UserData;
 import xyz.fluxinc.fluxcore.hooks.Placeholder;
 
 public class ChatPronounsPAPIHook extends Placeholder {
@@ -17,7 +18,9 @@ public class ChatPronounsPAPIHook extends Placeholder {
     @Override
     public String placeholder(Player player, String identifier) {
         if (player == null) return "";
-        PronounSet pronouns = instance.getStorageManager().getUserData(player).pronouns;
+        UserData data = instance.getStorageManager().getUserData(player);
+        if (data == null) return "";
+        PronounSet pronouns = data.pronouns;
         if (pronouns == null) return "";
 
         switch (identifier) {

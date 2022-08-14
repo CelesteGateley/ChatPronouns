@@ -33,13 +33,21 @@ public class StorageManager {
 
     public void setPronouns(OfflinePlayer player, PronounSet pronouns) throws IOException {
         UserData userData = this.getUserData(player);
-        userData.pronouns = pronouns;
+        if (userData == null) {
+            userData = new UserData(pronouns);
+        } else {
+            userData.pronouns = pronouns;
+        }
         this.setUserData(player, userData);
     }
 
     public void setPrompt(OfflinePlayer player, boolean prompt) throws IOException {
         UserData userData = this.getUserData(player);
-        userData.doNotPrompt = prompt;
+        if (userData == null) {
+            userData = new UserData(prompt);
+        } else {
+            userData.doNotPrompt = prompt;
+        }
         this.setUserData(player, userData);
     }
 }

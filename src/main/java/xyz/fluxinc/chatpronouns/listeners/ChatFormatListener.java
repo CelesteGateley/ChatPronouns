@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import xyz.fluxinc.chatpronouns.ChatPronouns;
 import xyz.fluxinc.chatpronouns.storage.PronounSet;
+import xyz.fluxinc.chatpronouns.storage.UserData;
 
 public class ChatFormatListener implements Listener {
 
@@ -21,10 +22,10 @@ public class ChatFormatListener implements Listener {
 
     @EventHandler
     public void chatEvent(AsyncPlayerChatEvent chatEvent) {
-        PronounSet pronouns = instance.getStorageManager().getUserData(chatEvent.getPlayer()).pronouns;
-        if (pronouns == null) {
-            return;
-        }
+        UserData data = instance.getStorageManager().getUserData(chatEvent.getPlayer());
+        if (data == null) return;
+        PronounSet pronouns = data.pronouns;
+        if (pronouns == null) return;
 
         if (instance.useHover()) {
             String format = instance.getLanguageManager().getFormattedString("chatFormat");
