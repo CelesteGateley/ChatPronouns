@@ -34,7 +34,7 @@ public class RemovePronounsCommand {
     public Command getRemoveCommand() {
         Command command = new Command(cmd).player("player");
         return command.executor((sender, args) -> {
-            Player cmdTarget = args[0] != null && sender.hasPermission("chatpronouns.others") ? (Player) args[0] : (Player) sender;
+            Player cmdTarget = args.get(0) != null && sender.hasPermission("chatpronouns.others") ? (Player) args.get(0) : (Player) sender;
             try {
                 instance.getStorageManager().setPronouns(cmdTarget, null);
                 if (cmdTarget == sender) {

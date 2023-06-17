@@ -8,6 +8,7 @@ import xyz.fluxinc.chatpronouns.storage.PronounSet;
 import xyz.fluxinc.fluxcore.command.Command;
 
 import java.io.IOException;
+import java.util.List;
 
 public class SetPronounsCommand {
 
@@ -37,18 +38,18 @@ public class SetPronounsCommand {
     }
 
     public Command getSetCommand() {
-        Command command = new Command(cmd).raw(new MultiLiteralArgument("male", "female", "non-binary", "unset"));
+        Command command = new Command(cmd).raw(new MultiLiteralArgument("gender", List.of("male", "female", "non-binary", "unset")));
         return command.executor((sender, args) -> {
             Player target = (Player) sender;
-            setPronouns(sender, target, (String) args[0]);
+            setPronouns(sender, target, (String) args.get(0));
         });
     }
 
     public Command getSetOtherCommand() {
-        Command command = new Command(cmd).raw(new MultiLiteralArgument("male", "female", "non-binary", "unset")).player("player");
+        Command command = new Command(cmd).raw(new MultiLiteralArgument("gender", List.of("male", "female", "non-binary", "unset"))).player("player");
         return command.executor((sender, args) -> {
-            Player target = args[1] != null && sender.hasPermission("chatpronouns.others") ? (Player) args[1] : (Player) sender;
-            setPronouns(sender, target, (String) args[0]);
+            Player target = args.get(1) != null && sender.hasPermission("chatpronouns.others") ? (Player) args.get(1) : (Player) sender;
+            setPronouns(sender, target, (String) args.get(0));
         });
     }
 

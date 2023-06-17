@@ -24,13 +24,13 @@ public class SetCustomCommand {
             if (!sender.hasPermission("chatpronouns.custom")) {
                 return;
             }
-            Player player = (Player) args[0];
+            Player player = (Player) args.get(0);
             if (player == null) {
                 sender.sendMessage(instance.getLanguageManager().generateInvalidUsageMessage());
                 return;
             }
             try {
-                PronounSet set = new PronounSet((String) args[1], (String) args[2]);
+                PronounSet set = new PronounSet((String) args.get(1), (String) args.get(2));
                 instance.getStorageManager().setPronouns(player, set);
                 player.sendMessage(instance.getLanguageManager().generateSetPronounMessage(set));
                 sender.sendMessage(instance.getLanguageManager().generateTargetSetPronouns(player, set));
